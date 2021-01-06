@@ -36,9 +36,10 @@ class LoginController extends Controller
 
             // $user->permission = $permission->makeHidden('menus');
 
-            $login = new Login();
-
             if (!empty($user)) {
+
+                $login = new Login();
+
                 return response()->json([
                     'code' => 200,
                     'status' => true,
