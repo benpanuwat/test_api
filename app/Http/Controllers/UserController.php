@@ -11,29 +11,27 @@ class UserController extends Controller
     {
         try {
 
-            // $columns = $request->input('columns');
-            // $length = $request->input('length');
-            // $order = $request->input('order');
-            // $search = $request->input('search');
-            // $start = $request->input('start');
-            // $page = $start / $length + 1; 
+            $columns = $request->input('columns');
+            $length = $request->input('length');
+            $order = $request->input('order');
+            $search = $request->input('search');
+            $start = $request->input('start');
+            $page = $start / $length + 1; 
 
-            // $col = array('use_id');
+            $col = array('use_id','use_fname','use_lname','use_email');
 
-            // $u = DB::table('users')
-            //     ->select($col)
-            //     ->orderby($col[$order[0]['column']], $order[0]['dir']);
+            $u = DB::table('users')
+                ->select($col)
+                ->orderby($col[$order[0]['column']], $order[0]['dir']);
 
-            // if ($search['value'] != '' && $search['value'] != null) {
-            //     foreach ($col as &$c) {
-            //         $u->orWhere($c, 'LIKE', '%' . $search['value'] . '%');
-            //     }
-            // }
+            if ($search['value'] != '' && $search['value'] != null) {
+                foreach ($col as &$c) {
+                    $u->orWhere($c, 'LIKE', '%' . $search['value'] . '%');
+                }
+            }
 
-            // $user = $u->paginate($length, ['*'], 'page', $page);
-
-            $user = [];
-            $user = DB::table('users')->get();
+            $user = $u->paginate($length, ['*'], 'page', $page);
+            
             return response()->json($user);
 
         } catch (\Exception $e) {
