@@ -16,7 +16,7 @@ class UserController extends Controller
             // $order = $request->input('order');
             // $search = $request->input('search');
             // $start = $request->input('start');
-            // $page = $start / $length + 1;
+            // $page = $start / $length + 1; 
 
             // $col = array('use_id');
 
