@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Login;
 use \Firebase\JWT\JWT;
 use Exception;
 use Closure;
@@ -16,11 +17,12 @@ class CheckJWT
      * @return mixed
      */
 
-    public $key = "vsf_key";
-
     public function handle($request, Closure $next)
     {
         try {
+
+            $login = new Login();
+            
             $header = $request->header('Authorization');
             $token = str_replace('Bearer ', '', $header);
 
@@ -33,9 +35,9 @@ class CheckJWT
                 ], 200);
             }
 
-            $payload = JWT::decode($token, $this->key, array('HS256'));
+            $payload = JWT::decode($token, $login->key, array('HS256'));
             $request->request->add(['login_id' => $payload->aud]);
-            
+
         } catch (\Firebase\JWT\ExpiredException $e) {
             return response()->json([
                 'code' => '401',

@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +13,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\UserController;
+
+//Login Backoffice
+Route::post('/user_login_back', [LoginController::class, 'user_login_back']);
+
+//Users Backoffice
+Route::post('/table_user_back', [UserController::class, 'table_user_back']);
