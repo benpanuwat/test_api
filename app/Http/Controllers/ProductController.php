@@ -21,7 +21,6 @@ class ProductController extends Controller
                 ->where('active', '1')
                 ->get();
 
-
             return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $orders);
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage(), 405);
