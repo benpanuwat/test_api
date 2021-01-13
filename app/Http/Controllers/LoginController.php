@@ -21,9 +21,9 @@ class LoginController extends Controller
                 return $this->returnError('[password] ไม่มีข้อมูล', 400);
 
             $user = DB::table('users')
-                ->select('use_id', 'use_username')
-                ->where('use_username', $username)
-                ->where('use_password', md5($password))
+                ->select('id', 'username')
+                ->where('username', $username)
+                ->where('password', md5($password))
                 ->first();
 
             // $permission = Permission::select('id', 'name')->where('id', $user->permission_id)->where('active', 1)->first();
@@ -45,7 +45,7 @@ class LoginController extends Controller
                     'status' => true,
                     'massage' => 'เข้าสู่ระบบสำเร็จ',
                     'data' => $user,
-                    'token' =>  $login->genToken($user->use_id, $user->use_username, true)
+                    'token' =>  $login->genToken($user->id, $user->username, true)
                 ], 200);
             } else
                 return $this->returnError('ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง', 404);

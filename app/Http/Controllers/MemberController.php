@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class UserController extends Controller
+class MemberController extends Controller
 {
-    public function table_user_back(Request $request)
+    public function table_member_back(Request $request)
     {
         try {
 
@@ -16,11 +16,11 @@ class UserController extends Controller
             $order = $request->input('order');
             $search = $request->input('search');
             $start = $request->input('start');
-            $page = $start / $length + 1; 
+            $page = $start / $length + 1;
 
-            $col = array('id','fname','lname','email');
+            $col = array('id', 'fname', 'lname', 'tel');
 
-            $db = DB::table('users')
+            $db = DB::table('members')
                 ->select($col)
                 ->orderby($col[$order[0]['column']], $order[0]['dir']);
 
@@ -30,10 +30,9 @@ class UserController extends Controller
                 }
             }
 
-            $user = $db->paginate($length, ['*'], 'page', $page);
-            
-            return response()->json($user);
+            $member = $db->paginate($length, ['*'], 'page', $page);
 
+            return response()->json($member);
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage(), 405);
         }
