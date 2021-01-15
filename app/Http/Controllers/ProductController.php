@@ -77,7 +77,7 @@ class ProductController extends Controller
                 ->where('product_id', $product_id)
                 ->get();
 
-                $product->product_image = $product_image
+                $product->product_type = $product_type
 ;
 
             return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $product);
