@@ -30,6 +30,7 @@ Route::post('/table_member_back', [MemberController::class, 'table_member_back']
 
 //Product Web
 Route::post('/get_product_home', [ProductController::class, 'get_product_home']);
+Route::post('/get_product_detail', [ProductController::class, 'get_product_detail']);
 //Product Backoffice
 Route::post('/table_product_back', [ProductController::class, 'table_product_back']);
 Route::post('/create_product_back', [ProductController::class, 'create_product_back']);

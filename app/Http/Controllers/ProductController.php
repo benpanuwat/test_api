@@ -16,12 +16,71 @@ class ProductController extends Controller
     {
         try {
 
-            $orders = DB::table('view_products')
-                ->select('priduct_id', 'name', 'standard_price', 'category_id', 'category_name')
+            $data = [];
+
+            $product_recommend = DB::table('view_products_recommend_home')
+                ->select('product_id', 'name', 'standard_price', 'category_id', 'category_name', 'path', 'price')
+                ->orderBy('product_id', 'DESC')
+                ->limit(10)
                 ->where('active', '1')
                 ->get();
 
-            return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $orders);
+            foreach ($product_recommend as &$pro) {
+                $pro->discount = 0;
+                if ($pro->standard_price > 0)
+                    $pro->discount = 100 - intval(($pro->price / intval($pro->standard_price)) * 100);
+            }
+
+            $data['product_recommend'] = $product_recommend;
+
+            $product_new = DB::table('view_products_home')
+                ->select('product_id', 'name', 'standard_price', 'category_id', 'category_name', 'path', 'price')
+                ->orderBy('product_id', 'DESC')
+                ->limit(10)
+                ->where('active', '1')
+                ->get();
+
+            foreach ($product_new as &$pro) {
+                $pro->discount = 0;
+                if ($pro->standard_price > 0)
+                    $pro->discount = 100 - intval(($pro->price / intval($pro->standard_price)) * 100);
+            }
+
+            $data['product_new'] = $product_new;
+
+            return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $data);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function get_product_detail(Request $request)
+    {
+        try {
+
+            $product_id = $request->input('product_id');
+
+            if ($product_id == "")
+                return $this->returnError('[product_id] ไม่มีข้อมูล', 400);
+
+            $product = Product::select('id','name','description','detail','standard_price')
+                ->where('id', $product_id)
+                ->first();
+
+                $product_image = ProductImage::select('id','path','main')
+                ->where('product_id', $product_id)
+                ->get();
+
+                $product->product_image = $product_image;
+
+                $product_type = ProductType::select('id','name','price','stock')
+                ->where('product_id', $product_id)
+                ->get();
+
+                $product->product_image = $product_image
+;
+
+            return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $product);
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage(), 405);
         }
@@ -111,7 +170,7 @@ class ProductController extends Controller
                     file_put_contents($path . $filename, file_get_contents($file));
 
                     $product_image = new ProductImage();
-                    $product_image->id = $product->id;
+                    $product_image->product_id = $product->id;
                     $product_image->path = $path . $filename;
                     $product_image->main = ($img['main'] == true) ? 1 : 0;
                     $product_image->save();;
