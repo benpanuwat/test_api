@@ -25,6 +25,8 @@ Route::post('/user_login_back', [LoginController::class, 'user_login_back']);
 //Users Backoffice
 Route::post('/table_user_back', [UserController::class, 'table_user_back']);
 
+//Member Web
+Route::post('/create_member', [MemberController::class, 'create_member']);
 //Member Backoffice
 Route::post('/table_member_back', [MemberController::class, 'table_member_back']);
 

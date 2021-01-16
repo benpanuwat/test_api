@@ -10,12 +10,13 @@ class Login extends Model
 {
     public $key = "key";
 
-    public function genToken($id, $name, $admin)
+    public function genToken($id, $name, $email, $admin)
     {
         $payload = array(
             "iss" => "truelinemed",
             "aud" => $id,
             "name" => $name,
+            "email" => $email,
             "admin" => $admin,
             "iat" => Carbon::now()->timestamp,
             "exp" => Carbon::now()->timestamp + 86400,

@@ -63,22 +63,21 @@ class ProductController extends Controller
             if ($product_id == "")
                 return $this->returnError('[product_id] ไม่มีข้อมูล', 400);
 
-            $product = Product::select('id','name','description','detail','standard_price')
+            $product = Product::select('id', 'name', 'description', 'detail', 'standard_price')
                 ->where('id', $product_id)
                 ->first();
 
-                $product_image = ProductImage::select('id','path','main')
+            $product_image = ProductImage::select('id', 'path', 'main')
                 ->where('product_id', $product_id)
                 ->get();
 
-                $product->product_image = $product_image;
+            $product->product_image = $product_image;
 
-                $product_type = ProductType::select('id','name','price','stock')
+            $product_type = ProductType::select('id', 'name', 'price', 'stock')
                 ->where('product_id', $product_id)
                 ->get();
 
-                $product->product_type = $product_type
-;
+            $product->product_type = $product_type;
 
             return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $product);
         } catch (\Exception $e) {

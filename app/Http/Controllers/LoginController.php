@@ -45,7 +45,7 @@ class LoginController extends Controller
                     'status' => true,
                     'massage' => 'เข้าสู่ระบบสำเร็จ',
                     'data' => $user,
-                    'token' =>  $login->genToken($user->id, $user->username, true)
+                    'token' =>  $login->genToken($user->id, $user->username, '', true)
                 ], 200);
             } else
                 return $this->returnError('ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง', 404);
