@@ -19,6 +19,8 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 
+//Login
+Route::post('/member_login', [LoginController::class, 'member_login']);
 //Login Backoffice
 Route::post('/user_login_back', [LoginController::class, 'user_login_back']);
 

@@ -3,12 +3,48 @@
 namespace App\Http\Controllers;
 
 use App\Models\Login;
+use App\Models\Member;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class LoginController extends Controller
 {
+    public function member_login(Request $request)
+    {
+        try {
+            $email = $request->input('email');
+            $password = $request->input('password');
+
+            if ($email == "")
+                return $this->returnError('[email] ไม่มีข้อมูล', 400);
+            else if ($password == "")
+                return $this->returnError('[password] ไม่มีข้อมูล', 400);
+
+            $member = Member::where('email', $email)
+                ->where('password', md5($password))
+                ->first();
+
+            if (!empty($member)) {
+
+                unset($member->password);
+
+                $login = new Login();
+
+                return response()->json([
+                    'code' => 200,
+                    'status' => true,
+                    'massage' => 'เข้าสู่ระบบสำเร็จ',
+                    'data' => $member,
+                    'token' =>  $login->genToken($member->id, $member->fname, $member->email, false)
+                ], 200);
+            } else
+                return $this->returnError('ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง', 404);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
     public function user_login_back(Request $request)
     {
         try {

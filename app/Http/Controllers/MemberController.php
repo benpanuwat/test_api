@@ -28,7 +28,7 @@ class MemberController extends Controller
 
             $checkEmail = Member::where('email', $email)->first();
 
-            if (empty($checkEmail))
+            if (!empty($checkEmail))
                 return $this->returnError('อีเมลนี้ลงทะเบียนแล้ว', 400);
 
             $member = new Member();
@@ -39,6 +39,8 @@ class MemberController extends Controller
 
             if ($member->save()) {
 
+                unset($member->password);
+
                 $login = new Login();
 
                 return response()->json([
@@ -46,7 +48,7 @@ class MemberController extends Controller
                     'status' => true,
                     'massage' => 'ดำเนินการลงทะเบียนสำเร็จ',
                     'data' => $member,
-                    'token' =>  $login->genToken($member->id, $member->fname, $member->email, true)
+                    'token' =>  $login->genToken($member->id, $member->fname, $member->email, false)
                 ], 200);
             } else
                 return $this->returnError('ดำเนินการลงทะเบียนล้มเหลว', 400);
