@@ -14,7 +14,7 @@ class Controller extends BaseController
     public function returnSuccess($massage, $data)
     {
         return response()->json([
-            'code' => strval(200),
+            'code' => 200,
             'status' => true,
             'massage' => $massage,
             'data' => $data,
@@ -24,7 +24,7 @@ class Controller extends BaseController
     public function returnError($massage, $code)
     {
         return response()->json([
-            'code' => strval($code),
+            'code' => $code,
             'status' => false,
             'massage' => $massage,
             'data' => [],

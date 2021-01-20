@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductType;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -47,6 +48,13 @@ class ProductController extends Controller
             }
 
             $data['product_new'] = $product_new;
+
+            $category = DB::table('view_category')
+                ->select('id', 'name','product_count')
+                ->where('name', '<>', 'ไม่มีกลุ่มสินค้า')
+                ->get();
+
+            $data['category'] = $category;
 
             return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $data);
         } catch (\Exception $e) {

@@ -57,6 +57,68 @@ class MemberController extends Controller
         }
     }
 
+    public function get_memder_account(Request $request)
+    {
+        try {
+
+            $login_id = $request->input('login_id');
+
+            if ($login_id == "")
+                return $this->returnError('[login_id] ไม่มีข้อมูล', 400);
+
+            $member = Member::select('id', 'fname', 'lname', 'email', 'tel')
+                ->where('id', $login_id)
+                ->first();
+
+            if (!empty($member)) {
+                return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $member);
+            } else
+                return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function update_memder_account(Request $request)
+    {
+        try {
+
+            $login_id = $request->input('login_id');
+            $fname = $request->input('fname');
+            $lname = $request->input('lname');
+            $email = $request->input('email');
+            $tel = $request->input('tel');
+
+            if ($login_id == "")
+                return $this->returnError('[login_id] ไม่มีข้อมูล', 400);
+            else if ($fname == "")
+                return $this->returnError('[fname] ไม่มีข้อมูล', 400);
+            else if ($lname == "")
+                return $this->returnError('[lname] ไม่มีข้อมูล', 400);
+            else if ($email == "")
+                return $this->returnError('[email] ไม่มีข้อมูล', 400);
+            else if ($tel == "")
+                return $this->returnError('[tel] ไม่มีข้อมูล', 400);
+
+            $member = Member::where('id', $login_id)
+                ->first();
+
+            if (!empty($member)) {
+
+                $member->fname = $fname;
+                $member->lname = $lname;
+                $member->email = $email;
+                $member->tel = $tel;
+                $member->update();
+
+                return $this->returnSuccess('บันทึกข้อมูลสำเร็จ', []);
+            } else
+                return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
     public function table_member_back(Request $request)
     {
         try {
