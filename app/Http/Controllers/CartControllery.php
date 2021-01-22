@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
+use App\Models\Cart;
 use App\Models\ProductType;
 use Illuminate\Http\Request;
 
-class OrderController extends Controller
+class CartController extends Controller
 {
-    public function create_order(Request $request)
+    public function add_cart(Request $request)
     {
         try {
 
@@ -38,17 +38,17 @@ class OrderController extends Controller
             if ($count == "")
                 return $this->returnError('[count] ไม่มีข้อมูล', 400);
 
-            $order = new Order();
-            $order->member_id = $login_id;
-            $order->product_id = $product_id;
-            $order->product_type_id = $product_type_id;
-            $order->price = $price;
-            $order->count = $count;
+            $cart = new Cart();
+            $cart->member_id = $login_id;
+            $cart->product_id = $product_id;
+            $cart->product_type_id = $product_type_id;
+            $cart->price = $price;
+            $cart->count = $count;
 
-            if ($order->save()) {
-                return $this->returnSuccess('ดำเนินการสั่งซื้อสำเร็จ', []);
+            if ($cart->save()) {
+                return $this->returnSuccess('ดำเนินการเพิ่มสินค้าลงตะกร้าสำเร็จ', []);
             } else
-                return $this->returnError('ดำเนินการสั่งซื้อไม่สำเร็จ', 400);
+                return $this->returnError('ดำเนินการเพิ่มสินค้าลงตะกร้าไม่สำเร็จ', 400);
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage(), 405);
         }

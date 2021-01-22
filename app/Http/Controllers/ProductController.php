@@ -55,7 +55,7 @@ class ProductController extends Controller
                 ->get();
 
             $data['category'] = $category;
-
+            
             return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $data);
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage(), 405);
