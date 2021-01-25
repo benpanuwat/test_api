@@ -30,6 +30,7 @@ Route::post('/user_login_back', [LoginController::class, 'user_login_back']);
 //Product Web
 Route::post('/get_product_home', [ProductController::class, 'get_product_home']);
 Route::post('/get_product_detail', [ProductController::class, 'get_product_detail']);
+Route::post('/get_product_page', [ProductController::class, 'get_product_page']);
 //Category
 Route::post('/get_category', [CategoryController::class, 'get_category']);
 //Header

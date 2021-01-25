@@ -24,6 +24,7 @@ class CategoryController extends Controller
             return $this->returnError($e->getMessage(), 405);
         }
     }
+
     public function get_category_back(Request $request)
     {
         try {

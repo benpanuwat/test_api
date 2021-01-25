@@ -50,13 +50,47 @@ class ProductController extends Controller
             $data['product_new'] = $product_new;
 
             $category = DB::table('view_category')
-                ->select('id', 'name','product_count')
+                ->select('id', 'name', 'product_count')
                 ->where('name', '<>', 'ไม่มีกลุ่มสินค้า')
                 ->get();
 
             $data['category'] = $category;
-            
+
             return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $data);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function get_product_page(Request $request)
+    {
+        try {
+
+            $length = $request->input('length');
+            $search = $request->input('search');
+            $start = $request->input('start');
+            $page = $start / $length + 1;
+
+            $col = array('product_id', 'name','description', 'standard_price', 'category_id', 'category_name', 'path', 'price');
+
+            $db = DB::table('view_products_page')
+                ->select($col);
+
+            if ($search != '' && $search != null) {
+                foreach ($col as &$c) {
+                    $db->orWhere($c, 'LIKE', '%' . $search . '%');
+                }
+            }
+
+            $product = $db->paginate($length, ['*'], 'page', $page);
+
+            foreach ($product as &$pro) {
+                $pro->discount = 0;
+                if ($pro->standard_price > 0)
+                    $pro->discount = 100 - intval(($pro->price / intval($pro->standard_price)) * 100);
+            }
+
+            return response()->json($product);
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage(), 405);
         }
