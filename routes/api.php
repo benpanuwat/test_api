@@ -19,7 +19,7 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AddressController;
-use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\HeaderController;
 
@@ -32,12 +32,14 @@ Route::post('/get_product_home', [ProductController::class, 'get_product_home'])
 Route::post('/get_product_detail', [ProductController::class, 'get_product_detail']);
 //Category
 Route::post('/get_category', [CategoryController::class, 'get_category']);
-//Category
+//Header
 Route::post('/get_header', [HeaderController::class, 'get_header']);
 //Member
 Route::post('/create_member', [MemberController::class, 'create_member']);
 
 Route::group(['middleware' => 'checkjwt'], function () {
+    //Header
+    Route::post('/get_header_login', [HeaderController::class, 'get_header_login']);
 
     //Users Backoffice
     Route::post('/table_user_back', [UserController::class, 'table_user_back']);
@@ -60,8 +62,11 @@ Route::group(['middleware' => 'checkjwt'], function () {
     Route::post('/get_address', [AddressController::class, 'get_address']);
     Route::post('/update_address', [AddressController::class, 'update_address']);
 
-    //Cart
-    Route::post('/add_cart', [CartController::class, 'add_cart']);
+    //Checkout
+    Route::post('/add_cart', [CheckoutController::class, 'add_cart']);
+    Route::post('/get_checkout', [CheckoutController::class, 'get_checkout']);
+    Route::post('/get_qrcode', [CheckoutController::class, 'get_qrcode']);
+    Route::post('/create_order', [CheckoutController::class, 'create_order']);
 
     //Order
     //Route::post('/create_order', [OrderController::class, 'create_order']);
