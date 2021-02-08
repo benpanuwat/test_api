@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Member;
 use App\Models\Login;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MemberController extends Controller
 {
@@ -145,6 +146,41 @@ class MemberController extends Controller
             $member = $db->paginate($length, ['*'], 'page', $page);
 
             return response()->json($member);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function reset_password(Request $request)
+    {
+        try {
+
+            $login_id = $request->input('login_id');
+            $old_password = $request->input('old_password');
+            $new_password = $request->input('new_password');
+
+            if ($login_id == "")
+                return $this->returnError('[login_id] ไม่มีข้อมูล', 400);
+            else if ($old_password == "")
+                return $this->returnError('รหัสผ่านเก่าไม่มีข้อมูล', 400);
+            else if ($new_password == "")
+                return $this->returnError('รหัสผ่านใหม่ไม่มีข้อมูล', 400);
+
+
+            $member = Member::where('id', $login_id)
+                ->first();
+
+            if (!empty($member)) {
+
+                if (md5($old_password) ==  $member->password) {
+                    $member->password = md5($new_password);
+                    $member->update();
+
+                    return $this->returnSuccess('บันทึกข้อมูลสำเร็จ', []);
+                } else
+                    return $this->returnError('รหัสผ่านเก่าไม่ถูกต้อง', 400);
+            } else
+                return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage(), 405);
         }

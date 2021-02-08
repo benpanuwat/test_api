@@ -22,6 +22,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\HeaderController;
+use App\Http\Controllers\FooterController;
 
 //Login
 Route::post('/member_login', [LoginController::class, 'member_login']);
@@ -30,17 +31,21 @@ Route::post('/user_login_back', [LoginController::class, 'user_login_back']);
 //Product Web
 Route::post('/get_product_home', [ProductController::class, 'get_product_home']);
 Route::post('/get_product_detail', [ProductController::class, 'get_product_detail']);
+Route::post('/get_data_page', [ProductController::class, 'get_data_page']);
 Route::post('/get_product_page', [ProductController::class, 'get_product_page']);
 //Category
 Route::post('/get_category', [CategoryController::class, 'get_category']);
 //Header
 Route::post('/get_header', [HeaderController::class, 'get_header']);
+//Footer
+Route::post('/get_footer', [FooterController::class, 'get_footer']);
 //Member
 Route::post('/create_member', [MemberController::class, 'create_member']);
 
 Route::group(['middleware' => 'checkjwt'], function () {
     //Header
     Route::post('/get_header_login', [HeaderController::class, 'get_header_login']);
+    Route::post('/delete_cart', [HeaderController::class, 'delete_cart']);
 
     //Users Backoffice
     Route::post('/table_user_back', [UserController::class, 'table_user_back']);
@@ -48,6 +53,7 @@ Route::group(['middleware' => 'checkjwt'], function () {
     //Member Web
     Route::post('/get_memder_account', [MemberController::class, 'get_memder_account']);
     Route::post('/update_memder_account', [MemberController::class, 'update_memder_account']);
+    Route::post('/reset_password', [MemberController::class, 'reset_password']);
 
     //Member Backoffice
     Route::post('/table_member_back', [MemberController::class, 'table_member_back']);
@@ -70,5 +76,5 @@ Route::group(['middleware' => 'checkjwt'], function () {
     Route::post('/create_order', [CheckoutController::class, 'create_order']);
 
     //Order
-    //Route::post('/create_order', [OrderController::class, 'create_order']);
+    Route::post('/get_order_list', [OrderController::class, 'get_order_list']);
 });

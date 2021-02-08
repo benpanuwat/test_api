@@ -154,11 +154,16 @@ class CheckoutController extends Controller
             $order->price_total = $price_total;
             $order->save();
 
+            $order->code = 'TLM' . str_pad($order->id, 10, "0", STR_PAD_LEFT);
+            $order->update();
+
             foreach ($products as &$pro) {
                 $order_product = new OrderProduct();
                 $order_product->order_id =  $order->id;
                 $order_product->product_id =  $pro['product_id'];
                 $order_product->product_type_id =  $pro['product_type_id'];
+                $order_product->price = $pro['price'];
+                $order_product->count = $pro['count'];
                 $order_product->save();
 
                 $cart = Cart::where('id', $pro['id'])->first();

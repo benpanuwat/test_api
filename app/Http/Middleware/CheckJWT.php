@@ -28,7 +28,7 @@ class CheckJWT
 
             if (!$token) {
                 return response()->json([
-                    'code' => '401',
+                    'code' => 401,
                     'status' => false,
                     'massage' => 'ไม่พบ Token',
                     'data' => []
@@ -40,14 +40,14 @@ class CheckJWT
 
         } catch (\Firebase\JWT\ExpiredException $e) {
             return response()->json([
-                'code' => '401',
+                'code' => 401,
                 'status' => false,
                 'massage' => 'Token หมดอายุ',
                 'data' => []
             ], 200);
         } catch (Exception $e) {
             return response()->json([
-                'code' => '401',
+                'code' => 401,
                 'status' => false,
                 'massage' => 'ยืนยันตัวตนไม่ผ่าน',
                 'data' => []

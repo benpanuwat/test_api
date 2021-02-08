@@ -62,24 +62,72 @@ class ProductController extends Controller
         }
     }
 
+    public function get_data_page(Request $request)
+    {
+        try {
+
+            $data = [];
+
+            $category = Category::select('id','name')
+            ->where('name', '<>', 'ไม่มีกลุ่มสินค้า')
+            ->get();
+
+            $data['category'] = $category;
+
+            $product_recommend = DB::table('view_products_recommend_home')
+                ->select('product_id', 'name', 'standard_price', 'category_id', 'category_name', 'path', 'price')
+                ->orderBy('product_id', 'DESC')
+                ->limit(10)
+                ->where('active', '1')
+                ->get();
+
+            foreach ($product_recommend as &$pro) {
+                $pro->discount = 0;
+                if ($pro->standard_price > 0)
+                    $pro->discount = 100 - intval(($pro->price / intval($pro->standard_price)) * 100);
+            }
+
+            $data['product_recommend'] = $product_recommend;
+
+            return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $data);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
     public function get_product_page(Request $request)
     {
         try {
 
+            $category_id = $request->input('category_id');
+            $order_by = $request->input('order_by');
             $length = $request->input('length');
             $search = $request->input('search');
             $start = $request->input('start');
             $page = $start / $length + 1;
 
-            $col = array('product_id', 'name','description', 'standard_price', 'category_id', 'category_name', 'path', 'price');
+            $col = array('product_id', 'name', 'description', 'detail', 'standard_price', 'category_id', 'category_name', 'path', 'price');
 
             $db = DB::table('view_products_page')
                 ->select($col);
 
+            if ($category_id != '' && $category_id != null) {
+                $db->where('category_id', $category_id);
+            }
+
+            if ($order_by == 'price')
+                $db->orderBy('price', 'ASC');
+            else if ($order_by == 'price-desc')
+                $db->orderBy('price', 'DESC');
+            else
+                $db->orderBy('product_id', 'DESC');
+
             if ($search != '' && $search != null) {
-                foreach ($col as &$c) {
-                    $db->orWhere($c, 'LIKE', '%' . $search . '%');
-                }
+                $db->where(function ($query) use ($search) {
+                    $query->orWhere('name', 'LIKE', '%' . $search . '%');
+                    $query->orWhere('description', 'LIKE', '%' . $search . '%');
+                    $query->orWhere('detail', 'LIKE', '%' . $search . '%');
+                });
             }
 
             $product = $db->paginate($length, ['*'], 'page', $page);
