@@ -12,85 +12,10 @@ use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class OrderController extends Controller
+class PaymentController extends Controller
 {
-    public function get_order_list(Request $request)
-    {
-        try {
 
-            $login_id = $request->input('login_id');
-            $status = $request->input('status');
-
-            if ($login_id == "")
-                return $this->returnError('[login_id] ไม่มีข้อมูล', 400);
-            if ($status == "")
-                return $this->returnError('[status] ไม่มีข้อมูล', 400);
-
-            $data = array();
-
-            $status_count = array(
-                'payment' => 0,
-                'packing' => 0,
-                'delivery' => 0,
-                'finish' => 0,
-                'cancel' => 0
-            );
-
-            $order_status_list = DB::table('view_order_status')
-                ->select('status', 'count')
-                ->where('member_id', $login_id)
-                ->get();
-
-
-            foreach ($order_status_list as $order_status) {
-                if ($order_status->status == 'payment')
-                    $status_count['payment'] = $order_status->count;
-                else if ($order_status->status == 'packing')
-                    $status_count['packing'] = $order_status->count;
-                else if ($order_status->status == 'delivery')
-                    $status_count['delivery'] = $order_status->count;
-                else if ($order_status->status == 'finish')
-                    $status_count['finish'] = $order_status->count;
-                else if ($order_status->status == 'cancel')
-                    $status_count['cancel'] = $order_status->count;
-            }
-
-            $data['status_count'] = $status_count;
-
-            $orders = Order::select('id', 'code', 'address_id', 'price_total', 'status', 'created_at')
-                ->where('member_id', $login_id)
-                ->where(function ($query) use ($status) {
-                    if ($status != 'all')
-                        $query->where('status', $status);
-                })
-                ->limit(50)
-                ->get();
-
-            foreach ($orders as $order) {
-                $address = Address::select('id', 'name', 'tel', 'others', 'province', 'amphoe', 'district', 'zipcode')
-                    ->where('id', $order->address_id)
-                    ->first();
-                $order['address'] = $address;
-
-                $products = DB::table('view_order_product')
-                    ->where('order_id', $order->id)
-                    ->get();
-
-                $order['products'] = $products;
-            }
-
-            $data['orders'] = $orders;
-
-            if (!empty($status_count)) {
-                return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $data);
-            } else
-                return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 404);
-        } catch (\Exception $e) {
-            return $this->returnError($e->getMessage(), 405);
-        }
-    }
-
-    public function table_order_back(Request $request)
+    public function table_payment_back(Request $request)
     {
         try {
 
@@ -105,6 +30,7 @@ class OrderController extends Controller
 
             $db = DB::table('view_order_list')
                 ->select($col)
+                ->where('status', 'payment')
                 ->orderby($col[$order[0]['column']], $order[0]['dir']);
 
             if ($search['value'] != '' && $search['value'] != null) {
@@ -121,7 +47,7 @@ class OrderController extends Controller
         }
     }
 
-    public function get_order_detail_back(Request $request)
+    public function get_payment_detail_back(Request $request)
     {
         try {
 
@@ -174,6 +100,77 @@ class OrderController extends Controller
             $order->order_product = $order_product;
 
             return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $order);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function accept_payment_back(Request $request)
+    {
+        try {
+
+            $order_id = $request->input('id');
+
+            if ($order_id == "")
+                return $this->returnError('[order_id] ไม่มีข้อมูล', 400);
+
+            $order = Order::where('id', $order_id)
+                ->first();
+
+            if (!empty($order)) {
+
+                $order_product  = OrderProduct::where('order_id', $order->id)
+                    ->get();
+
+                foreach ($order_product as $op) {
+                    $product_type  = ProductType::where('id', $op->product_type_id)
+                        ->first();
+
+                    if ($op->count > $product_type->stock) {
+                        $product  = Product::where('id', $op->product_id)
+                            ->first();
+
+                        return $this->returnError($product->name . '(' . $product_type->name . ') มีสินค้าไม่พอ ปัจจุบันคงเหลือ ' . $product_type->stock . ' ชิ้น', 400);
+                    }
+
+                    $product_type->stock =  $product_type->stock - $op->count;
+                    $product_type->update();
+                }
+
+                DB::beginTransaction();
+
+                $order->status = 'packing';
+                $order->update();
+
+                DB::commit();
+                return $this->returnSuccess('บันทึกข้อมูลสำเร็จ', []);
+            } else
+                return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
+        } catch (\Exception $e) {
+            Db::rollBack();
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function reject_payment_back(Request $request)
+    {
+        try {
+
+            $order_id = $request->input('id');
+
+            if ($order_id == "")
+                return $this->returnError('[order_id] ไม่มีข้อมูล', 400);
+
+            $order = Order::where('id', $order_id)
+                ->first();
+
+            if (!empty($order)) {
+                $order->status = 'cancel';
+                $order->update();
+
+                return $this->returnSuccess('บันทึกข้อมูลสำเร็จ', []);
+            } else
+                return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage(), 405);
         }

@@ -38,7 +38,7 @@ class ProductController extends Controller
                 ->select('product_id', 'name', 'standard_price', 'category_id', 'category_name', 'path', 'price')
                 ->orderBy('product_id', 'DESC')
                 ->limit(10)
-                ->where('active', '1')
+                ->where('active', 1)
                 ->get();
 
             foreach ($product_new as &$pro) {
@@ -50,7 +50,7 @@ class ProductController extends Controller
             $data['product_new'] = $product_new;
 
             $category = DB::table('view_category')
-                ->select('id', 'name', 'product_count')
+                ->select('id', 'name','path', 'product_count')
                 ->where('name', '<>', 'ไม่มีกลุ่มสินค้า')
                 ->get();
 
@@ -68,9 +68,9 @@ class ProductController extends Controller
 
             $data = [];
 
-            $category = Category::select('id','name')
-            ->where('name', '<>', 'ไม่มีกลุ่มสินค้า')
-            ->get();
+            $category = Category::select('id', 'name')
+                ->where('name', '<>', 'ไม่มีกลุ่มสินค้า')
+                ->get();
 
             $data['category'] = $category;
 
@@ -109,7 +109,8 @@ class ProductController extends Controller
             $col = array('product_id', 'name', 'description', 'detail', 'standard_price', 'category_id', 'category_name', 'path', 'price');
 
             $db = DB::table('view_products_page')
-                ->select($col);
+                ->select($col)
+                ->where('active', 1);
 
             if ($category_id != '' && $category_id != null) {
                 $db->where('category_id', $category_id);
@@ -186,9 +187,9 @@ class ProductController extends Controller
             $start = $request->input('start');
             $page = $start / $length + 1;
 
-            $col = array('id', 'name');
+            $col = array('id', 'name', 'active', 'category_name', 'path');
 
-            $db = DB::table('products')
+            $db = DB::table('view_products')
                 ->select($col)
                 ->orderby($col[$order[0]['column']], $order[0]['dir']);
 
@@ -215,8 +216,8 @@ class ProductController extends Controller
             $detail = $request->input('detail');
             $category_id = $request->input('category_id');
             $standard_price = $request->input('standard_price');
-            $images = $request->input('images');
-            $types = $request->input('types');
+            $product_image = $request->input('product_image');
+            $product_type = $request->input('product_type');
 
             if ($name == "")
                 return $this->returnError('[name] ไม่มีข้อมูล', 400);
@@ -228,10 +229,10 @@ class ProductController extends Controller
                 return $this->returnError('[category_id] ไม่มีข้อมูล', 400);
             else if ($standard_price == "")
                 return $this->returnError('[standard_price] ไม่มีข้อมูล', 400);
-            else if ($images == "")
-                return $this->returnError('[images] ไม่มีข้อมูล', 400);
-            else if ($types == "")
-                return $this->returnError('[types] ไม่มีข้อมูล', 400);
+            else if ($product_image == "")
+                return $this->returnError('[product_image] ไม่มีข้อมูล', 400);
+            else if ($product_type == "")
+                return $this->returnError('[product_type] ไม่มีข้อมูล', 400);
 
             DB::beginTransaction();
 
@@ -250,7 +251,7 @@ class ProductController extends Controller
                 if (!File::exists($path))
                     File::makeDirectory($path, 0777, true);
 
-                foreach ($images as &$img) {
+                foreach ($product_image as &$img) {
 
                     $file = $img['image'];
 
@@ -265,7 +266,7 @@ class ProductController extends Controller
                     $product_image->save();;
                 }
 
-                foreach ($types as &$type) {
+                foreach ($product_type as &$type) {
 
                     $product_type = new ProductType();
                     $product_type->product_id = $product->id;
@@ -276,11 +277,249 @@ class ProductController extends Controller
                 }
 
                 DB::commit();
-                return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', []);
+                return $this->returnSuccess('เพิ่มข้อมูลสำเร็จ', []);
             } else
-                return $this->returnError('ดำเนินการเพิ่มสินค้าล้มเหลว', 400);
+                return $this->returnError('เพิ่มข้อมูลล้มเหลว', 400);
         } catch (\Exception $e) {
             DB::rollback();
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function get_product_detail_back(Request $request)
+    {
+        try {
+
+            $product_id = $request->input('id');
+
+            if ($product_id == "")
+                return $this->returnError('[product_id] ไม่มีข้อมูล', 400);
+
+            $data = [];
+            $product = Product::select('id', 'name', 'description', 'detail', 'standard_price', 'category_id')
+                ->where('id', $product_id)
+                ->first();
+
+            $product_image = ProductImage::select('id', 'path', 'main')
+                ->where('product_id', $product_id)
+                ->get();
+
+            foreach ($product_image as $img) {
+                $img->main = ($img->main == 1) ? true : false;
+            }
+
+            $product->product_image = $product_image;
+
+            $product_type = ProductType::select('id', 'name', 'price', 'stock')
+                ->where('product_id', $product_id)
+                ->get();
+
+            $product->product_type = $product_type;
+            $data['product'] = $product;
+
+            $category = Category::select('id', 'name')
+                ->get();
+            $data['category'] = $category;
+
+            return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $data);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function update_product_back(Request $request)
+    {
+        try {
+
+            $id = $request->input('id');
+            $name = $request->input('name');
+            $description = $request->input('description');
+            $detail = $request->input('detail');
+            $category_id = $request->input('category_id');
+            $standard_price = $request->input('standard_price');
+            $images = $request->input('product_image');
+            $types = $request->input('product_type');
+
+            if ($id == "")
+                return $this->returnError('[id] ไม่มีข้อมูล', 400);
+            else if ($name == "")
+                return $this->returnError('[name] ไม่มีข้อมูล', 400);
+            else if ($description == "")
+                return $this->returnError('[description] ไม่มีข้อมูล', 400);
+            else if ($detail == "")
+                return $this->returnError('[detail] ไม่มีข้อมูล', 400);
+            else if ($category_id == "")
+                return $this->returnError('[category_id] ไม่มีข้อมูล', 400);
+            else if ($standard_price == "")
+                return $this->returnError('[standard_price] ไม่มีข้อมูล', 400);
+            else if ($images == "")
+                return $this->returnError('[product_image] ไม่มีข้อมูล', 400);
+            else if ($types == "")
+                return $this->returnError('[product_type] ไม่มีข้อมูล', 400);
+
+            DB::beginTransaction();
+
+            $product = Product::where('id', $id)
+                ->first();
+
+            if (empty($product))
+                return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
+
+            $product->name = $name;
+            $product->description = $description;
+            $product->detail = $detail;
+            $product->category_id = $category_id;
+            $product->standard_price = $standard_price;
+
+
+            if ($product->update()) {
+
+                $path = 'images/product/' . $product->id . '/';
+
+                if (!File::exists($path))
+                    File::makeDirectory($path, 0777, true);
+
+                $product_image_check = ProductImage::where('product_id', $product->id)
+                    ->get();
+
+                foreach ($product_image_check as &$img_check) {
+                    $status_image_check = true;
+                    foreach ($images as &$img) {
+
+                        if ($img['id'] != '' && $img_check->id == $img['id']) {
+                            $status_image_check = false;
+                            break;
+                        }
+                    }
+
+                    if ($status_image_check)
+                        $img_check->delete();
+                }
+
+
+                foreach ($images as &$img) {
+
+                    if ($img['id'] == "") {
+
+                        $file = $img['image'];
+
+                        $extension = explode('/', mime_content_type($file))[1];
+                        $filename = md5($product->id . rand(0, 999999)) . '.' . $extension;
+                        file_put_contents($path . $filename, file_get_contents($file));
+
+                        $product_image = new ProductImage();
+                        $product_image->product_id = $product->id;
+                        $product_image->path = $path . $filename;
+                        $product_image->main = ($img['main'] == true) ? 1 : 0;
+                        $product_image->save();
+                    } else {
+                        $product_image = ProductImage::where('id', $img['id'])
+                            ->first();
+
+                        if (!empty($product_image)) {
+                            $product_image->main = ($img['main'] == true) ? 1 : 0;
+                            $product_image->update();
+                        }
+                    }
+                }
+
+
+                $product_type_check = ProductType::where('product_id', $product->id)
+                    ->get();
+
+                foreach ($product_type_check as &$type_check) {
+                    $status_type_check = true;
+                    foreach ($types as &$type) {
+
+                        if ($type['id'] != '' && $type_check->id == $type['id']) {
+                            $status_type_check = false;
+                            break;
+                        }
+                    }
+
+                    if ($status_type_check)
+                        $type_check->delete();
+                }
+
+                foreach ($types as &$type) {
+
+                    if ($type['id'] == "") {
+
+                        $product_type = new ProductType();
+                        $product_type->product_id = $product->id;
+                        $product_type->name = $type['name'];
+                        $product_type->price = $type['price'];
+                        $product_type->stock = $type['stock'];
+                        $product_type->save();
+                    } else {
+                        $product_type = ProductType::where('id', $type['id'])
+                            ->first();
+
+                        if (!empty($product_type)) {
+                            $product_type->name = $type['name'];
+                            $product_type->price = $type['price'];
+                            $product_type->stock = $type['stock'];
+                            $product_type->update();
+                        }
+                    }
+                }
+
+                DB::commit();
+                return $this->returnSuccess('แก้ไขข้อมูลสำเร็จ', []);
+            } else
+                return $this->returnError('แก้ไขข้อมูลล้มเหลว', 400);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function update_product_active_back(Request $request)
+    {
+        try {
+
+            $id = $request->input('id');
+
+            if ($id == "")
+                return $this->returnError('[id] ไม่มีข้อมูล', 400);
+
+            $product = Product::where('id', $id)
+                ->first();
+
+            if (empty($product))
+                return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
+
+            $product->active = 1;
+            $product->update();
+
+            return $this->returnSuccess('แก้ไขข้อมูลสำเร็จ', []);
+        } catch (\Exception $e) {
+
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function update_product_noactive_back(Request $request)
+    {
+        try {
+
+            $id = $request->input('id');
+
+            if ($id == "")
+                return $this->returnError('[id] ไม่มีข้อมูล', 400);
+
+            $product = Product::where('id', $id)
+                ->first();
+
+            if (empty($product))
+                return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
+
+            $product->active = 0;
+            $product->update();
+
+            return $this->returnSuccess('แก้ไขข้อมูลสำเร็จ', []);
+        } catch (\Exception $e) {
+
             return $this->returnError($e->getMessage(), 405);
         }
     }
