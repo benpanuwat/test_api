@@ -6,6 +6,9 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductType;
 use App\Models\Category;
+use App\Models\Banner;
+use App\Models\BannerCategory;
+use App\Models\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -13,11 +16,17 @@ use Illuminate\Support\Facades\File;
 class ProductController extends Controller
 {
 
-    public function get_product_home(Request $request)
+    public function get_home(Request $request)
     {
         try {
 
             $data = [];
+
+            $banners = Banner::select('id', 'path')->get();
+            $data['banners'] = $banners;
+
+            $partner = Partner::select('id', 'path')->get();
+            $data['partner'] = $partner;
 
             $product_recommend = DB::table('view_products_recommend_home')
                 ->select('product_id', 'name', 'standard_price', 'category_id', 'category_name', 'path', 'price')
@@ -50,7 +59,7 @@ class ProductController extends Controller
             $data['product_new'] = $product_new;
 
             $category = DB::table('view_category')
-                ->select('id', 'name','path', 'product_count')
+                ->select('id', 'name', 'path', 'product_count')
                 ->where('name', '<>', 'ไม่มีกลุ่มสินค้า')
                 ->get();
 
@@ -73,6 +82,9 @@ class ProductController extends Controller
                 ->get();
 
             $data['category'] = $category;
+
+            $banner_category = BannerCategory::select('id', 'path')->get();
+            $data['banner_category'] = $banner_category;
 
             $product_recommend = DB::table('view_products_recommend_home')
                 ->select('product_id', 'name', 'standard_price', 'category_id', 'category_name', 'path', 'price')

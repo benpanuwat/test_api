@@ -27,6 +27,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PackingController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\CancelController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\SettingController;
 
 //Login
@@ -34,7 +35,7 @@ Route::post('/member_login', [LoginController::class, 'member_login']);
 //Login Backoffice
 Route::post('/user_login_back', [LoginController::class, 'user_login_back']);
 //Product Web
-Route::post('/get_product_home', [ProductController::class, 'get_product_home']);
+Route::post('/get_home', [ProductController::class, 'get_home']);
 Route::post('/get_product_detail', [ProductController::class, 'get_product_detail']);
 Route::post('/get_data_page', [ProductController::class, 'get_data_page']);
 Route::post('/get_product_page', [ProductController::class, 'get_product_page']);
@@ -46,6 +47,8 @@ Route::post('/get_header', [HeaderController::class, 'get_header']);
 Route::post('/get_footer', [FooterController::class, 'get_footer']);
 //Member
 Route::post('/create_member', [MemberController::class, 'create_member']);
+//Blog
+Route::post('/get_blog_page', [BlogController::class, 'get_blog_page']);
 
 Route::group(['middleware' => 'checkjwt'], function () {
     //Header
@@ -113,7 +116,13 @@ Route::group(['middleware' => 'checkjwt'], function () {
     Route::post('/table_cancel_back', [CancelController::class, 'table_cancel_back']);
     Route::post('/get_cancel_detail_back', [CancelController::class, 'get_cancel_detail_back']);
     Route::post('/update_cancel_back', [CancelController::class, 'update_cancel_back']);
+    //Blog Backoffice
+    Route::post('/table_blog_back', [BlogController::class, 'table_blog_back']);
+    Route::post('/create_blog_back', [BlogController::class, 'create_blog_back']);
+    Route::post('/get_blog_detail_back', [BlogController::class, 'get_blog_detail_back']);
+    Route::post('/update_blog_back', [BlogController::class, 'update_blog_back']);
+    Route::post('/delete_blog_back', [BlogController::class, 'delete_blog_back']);
     //Setting Backoffice
-    Route::post('/get_banner_back', [SettingController::class, 'get_banner_back']);
-    Route::post('/update_banner_back', [SettingController::class, 'update_banner_back']);
+    Route::post('/get_setting_banner_back', [SettingController::class, 'get_setting_banner_back']);
+    Route::post('/update_setting_banner_back', [SettingController::class, 'update_setting_banner_back']);
 });

@@ -199,7 +199,7 @@ class CategoryController extends Controller
             $category->delete();
 
             DB::commit();
-            return $this->returnSuccess('เพิ่มข้อมูลสำเร็จ', []);
+            return $this->returnSuccess('ลบข้อมูลสำเร็จ', []);
         } catch (\Exception $e) {
             DB::rollback();
             return $this->returnError($e->getMessage(), 405);
