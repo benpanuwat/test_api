@@ -166,7 +166,7 @@ class ProductController extends Controller
             if ($product_id == "")
                 return $this->returnError('[product_id] ไม่มีข้อมูล', 400);
 
-            $product = Product::select('id', 'name', 'description', 'detail', 'standard_price')
+            $product = Product::select('id', 'name', 'description', 'detail', 'standard_price', 'category_id')
                 ->where('id', $product_id)
                 ->first();
 
@@ -181,6 +181,22 @@ class ProductController extends Controller
                 ->get();
 
             $product->product_type = $product_type;
+
+            $category_product = DB::table('view_producy_category')
+                ->select('product_id', 'name', 'standard_price', 'category_id', 'category_name', 'path', 'price')
+                ->where('category_id', $product->category_id)
+                ->where('product_id', '<>', $product->id)
+                ->limit(6)
+                ->where('active', 1)
+                ->get();
+
+            foreach ($category_product as &$pro) {
+                $pro->discount = 0;
+                if ($pro->standard_price > 0)
+                    $pro->discount = 100 - intval(($pro->price / intval($pro->standard_price)) * 100);
+            }
+
+            $product->category_product = $category_product;
 
             return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $product);
         } catch (\Exception $e) {

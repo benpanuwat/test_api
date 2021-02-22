@@ -28,6 +28,7 @@ use App\Http\Controllers\PackingController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\CancelController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\NewController;
 use App\Http\Controllers\SettingController;
 
 //Login
@@ -49,6 +50,8 @@ Route::post('/get_footer', [FooterController::class, 'get_footer']);
 Route::post('/create_member', [MemberController::class, 'create_member']);
 //Blog
 Route::post('/get_blog_page', [BlogController::class, 'get_blog_page']);
+Route::post('/get_blog_date', [BlogController::class, 'get_blog_date']);
+Route::post('/get_blog_detail', [BlogController::class, 'get_blog_detail']);
 
 Route::group(['middleware' => 'checkjwt'], function () {
     //Header
@@ -122,6 +125,9 @@ Route::group(['middleware' => 'checkjwt'], function () {
     Route::post('/get_blog_detail_back', [BlogController::class, 'get_blog_detail_back']);
     Route::post('/update_blog_back', [BlogController::class, 'update_blog_back']);
     Route::post('/delete_blog_back', [BlogController::class, 'delete_blog_back']);
+    //News Backoffice
+    Route::post('/table_news_back', [NewController::class, 'table_news_back']);
+    Route::post('/create_news_back', [NewController::class, 'create_news_back']);
     //Setting Backoffice
     Route::post('/get_setting_banner_back', [SettingController::class, 'get_setting_banner_back']);
     Route::post('/update_setting_banner_back', [SettingController::class, 'update_setting_banner_back']);

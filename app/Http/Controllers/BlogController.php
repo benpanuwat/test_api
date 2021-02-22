@@ -11,11 +11,46 @@ use Illuminate\Support\Facades\File;
 
 class BlogController extends Controller
 {
+    public function get_blog_date(Request $request)
+    {
+        try {
+
+            $blog_date = DB::table('view_blog_date')
+                ->select('blog_month', 'blog_year', 'count')
+                ->get();
+
+            $monthMap = [
+                1 => 'ม.ค.',
+                2 => 'ก.พ.',
+                3 => 'มี.ค.',
+                4 => 'เม.ย.',
+                5 => 'พ.ค.',
+                6 => 'มิ.ย.',
+                7 => 'ก.ค.',
+                8 => 'ส.ค.',
+                9 => 'ก.ย.',
+                10 => 'ต.ค.',
+                11 => 'พ.ย.',
+                12 => 'ธ.ค.'
+            ];
+
+            foreach ($blog_date as $bd) {
+                $bd->blog_month_th = $monthMap[$bd->blog_month];
+            }
+
+
+            return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $blog_date);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
     public function get_blog_page(Request $request)
     {
         try {
 
-            //$category_id = $request->input('category_id');
+            $month = $request->input('month');
+            $year = $request->input('year');
             $order_by = $request->input('order_by');
             $length = $request->input('length');
             $search = $request->input('search');
@@ -27,9 +62,10 @@ class BlogController extends Controller
             $db = DB::table('view_blogs')
                 ->select($col);
 
-            // if ($category_id != '' && $category_id != null) {
-            //     $db->where('category_id', $category_id);
-            // }
+            if ($month != '' && $month != null && $year != '' && $year != null) {
+                $db->whereMonth('created_at', $month);
+                $db->whereYear('created_at', $year);
+            }
 
             if ($search != '' && $search != null) {
                 $db->where(function ($query) use ($search) {
@@ -73,6 +109,76 @@ class BlogController extends Controller
             }
 
             return response()->json($blogs);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function get_blog_detail(Request $request)
+    {
+        try {
+
+            $blog_id = $request->input('id');
+
+            if ($blog_id == "")
+                return $this->returnError('[blog_id] ไม่มีข้อมูล', 400);
+
+            $blog = DB::table('view_blogs')
+                ->select('id', 'title', 'detail', 'created_at', 'user_id', 'fname', 'lname')
+                ->where('id', $blog_id)
+                ->first();
+
+            $blog_images = BlogImage::select('id', 'path')
+                ->where('blog_id', $blog_id)
+                ->get();
+
+            $monthMap = [
+                '01' => 'ม.ค.',
+                '02' => 'ก.พ.',
+                '03' => 'มี.ค.',
+                '04' => 'เม.ย.',
+                '05' => 'พ.ค.',
+                '06' => 'มิ.ย.',
+                '07' => 'ก.ค.',
+                '08' => 'ส.ค.',
+                '09' => 'ก.ย.',
+                '10' => 'ต.ค.',
+                '11' => 'พ.ย.',
+                '12' => 'ธ.ค.'
+            ];
+
+
+            $blog->day = date('d', strtotime($blog->created_at));
+            $blog->month  = $monthMap[date('m', strtotime($blog->created_at))];
+            $blog->year = date('Y', strtotime($blog->created_at));
+
+            $user =  User::select('fname', 'lname')
+                ->where('id', $blog->user_id)
+                ->first();
+
+            $blog->user = $user;
+            $blog->blog_images = $blog_images;
+
+
+            $blog_other = DB::table('view_blogs')
+                ->select('id', 'title', 'detail', 'created_at')
+                ->where('id','<>',$blog->id)
+                ->limit(6)
+                ->get();
+
+            foreach ($blog_other as $b) {
+                $blog_image =  BlogImage::select('path')
+                    ->where('blog_id', $b->id)
+                    ->first();
+                $b->path = $blog_image->path;
+                $b->detail = explode("\n", $b->detail)[0];
+                $b->day = date('d', strtotime($b->created_at));
+                $b->month  = $monthMap[date('m', strtotime($b->created_at))];
+                $b->year = date('Y', strtotime($b->created_at));
+            }
+
+            $blog->blog_other = $blog_other;
+            return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $blog);
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage(), 405);
         }
