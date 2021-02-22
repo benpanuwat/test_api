@@ -45,6 +45,120 @@ class LoginController extends Controller
         }
     }
 
+    public function member_login_social(Request $request)
+    {
+        try {
+            $provider_id = $request->input('provider_id');
+            $fname = $request->input('fname');
+            $lname = $request->input('lname');
+            $email = $request->input('email');
+            $provider = $request->input('provider');
+
+            if ($provider_id == "")
+                return $this->returnError('[provider_id] ไม่มีข้อมูล', 400);
+            else if ($fname == "")
+                return $this->returnError('[fname] ไม่มีข้อมูล', 400);
+            else if ($lname == "")
+                return $this->returnError('[lname] ไม่มีข้อมูล', 400);
+            else if ($email == "")
+                return $this->returnError('[email] ไม่มีข้อมูล', 400);
+            else if ($provider == "")
+                return $this->returnError('[provider] ไม่มีข้อมูล', 400);
+
+            if ($provider == 'FACEBOOK') {
+                $member = Member::where('email', $email)
+                    ->first();
+
+                $login = new Login();
+
+                if (!empty($member)) {
+                    if ($member->facebook_id == $provider_id) {
+                        return response()->json([
+                            'code' => 200,
+                            'status' => true,
+                            'massage' => 'เข้าสู่ระบบสำเร็จ',
+                            'data' => $member,
+                            'token' =>  $login->genToken($member->id, $member->fname, $member->email, false)
+                        ], 200);
+                    } else {
+                        $member->facebook_id = $provider_id;
+                        if ($member->update()) {
+                            return response()->json([
+                                'code' => 200,
+                                'status' => true,
+                                'massage' => 'เข้าสู่ระบบสำเร็จ',
+                                'data' => $member,
+                                'token' =>  $login->genToken($member->id, $member->fname, $member->email, false)
+                            ], 200);
+                        }
+                    }
+                } else {
+                    $member = new Member();
+                    $member->facebook_id = $provider_id;
+                    $member->email = $email;
+                    $member->fname = $fname;
+                    $member->lname = $lname;
+
+                    if ($member->save()) {
+                        return response()->json([
+                            'code' => 200,
+                            'status' => true,
+                            'massage' => 'เข้าสู่ระบบสำเร็จ',
+                            'data' => $member,
+                            'token' =>  $login->genToken($member->id, $member->fname, $member->email, false)
+                        ], 200);
+                    }
+                }
+            } else if ($provider == 'GOOGLE') {
+                $member = Member::where('email', $email)
+                    ->first();
+
+                $login = new Login();
+
+                if (!empty($member)) {
+                    if ($member->google_id == $provider_id) {
+                        return response()->json([
+                            'code' => 200,
+                            'status' => true,
+                            'massage' => 'เข้าสู่ระบบสำเร็จ',
+                            'data' => $member,
+                            'token' =>  $login->genToken($member->id, $member->fname, $member->email, false)
+                        ], 200);
+                    } else {
+                        $member->google_id = $provider_id;
+                        if ($member->update()) {
+                            return response()->json([
+                                'code' => 200,
+                                'status' => true,
+                                'massage' => 'เข้าสู่ระบบสำเร็จ',
+                                'data' => $member,
+                                'token' =>  $login->genToken($member->id, $member->fname, $member->email, false)
+                            ], 200);
+                        }
+                    }
+                } else {
+                    $member = new Member();
+                    $member->google_id = $provider_id;
+                    $member->email = $email;
+                    $member->fname = $fname;
+                    $member->lname = $lname;
+
+                    if ($member->save()) {
+                        return response()->json([
+                            'code' => 200,
+                            'status' => true,
+                            'massage' => 'เข้าสู่ระบบสำเร็จ',
+                            'data' => $member,
+                            'token' =>  $login->genToken($member->id, $member->fname, $member->email, false)
+                        ], 200);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
     public function user_login_back(Request $request)
     {
         try {

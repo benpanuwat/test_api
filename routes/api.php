@@ -33,6 +33,8 @@ use App\Http\Controllers\SettingController;
 
 //Login
 Route::post('/member_login', [LoginController::class, 'member_login']);
+Route::post('/member_login_social', [LoginController::class, 'member_login_social']);
+//Login Backoffice
 //Login Backoffice
 Route::post('/user_login_back', [LoginController::class, 'user_login_back']);
 //Product Web
