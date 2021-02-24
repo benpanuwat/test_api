@@ -29,6 +29,7 @@ use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\CancelController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\NewController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\SettingController;
 
 //Login
@@ -54,6 +55,10 @@ Route::post('/create_member', [MemberController::class, 'create_member']);
 Route::post('/get_blog_page', [BlogController::class, 'get_blog_page']);
 Route::post('/get_blog_date', [BlogController::class, 'get_blog_date']);
 Route::post('/get_blog_detail', [BlogController::class, 'get_blog_detail']);
+//News
+Route::post('/get_news_page', [NewController::class, 'get_news_page']);
+Route::post('/get_news_date', [NewController::class, 'get_news_date']);
+Route::post('/get_news_detail', [NewController::class, 'get_news_detail']);
 
 Route::group(['middleware' => 'checkjwt'], function () {
     //Header
@@ -130,7 +135,15 @@ Route::group(['middleware' => 'checkjwt'], function () {
     //News Backoffice
     Route::post('/table_news_back', [NewController::class, 'table_news_back']);
     Route::post('/create_news_back', [NewController::class, 'create_news_back']);
+    Route::post('/get_news_detail_back', [NewController::class, 'get_news_detail_back']);
+    Route::post('/update_news_back', [NewController::class, 'update_news_back']);
+    Route::post('/delete_news_back', [NewController::class, 'delete_news_back']);
+    Route::post('/update_news_show_back', [NewController::class, 'update_news_show_back']);
+    Route::post('/update_news_noshow_back', [NewController::class, 'update_news_noshow_back']);
     //Setting Backoffice
     Route::post('/get_setting_banner_back', [SettingController::class, 'get_setting_banner_back']);
     Route::post('/update_setting_banner_back', [SettingController::class, 'update_setting_banner_back']);
+    //Stock Backoffice
+    Route::post('/table_stock_back', [StockController::class, 'table_stock_back']);
+    Route::post('/get_stock_detail', [StockController::class, 'get_stock_detail']);
 });

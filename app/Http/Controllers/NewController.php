@@ -5,184 +5,166 @@ namespace App\Http\Controllers;
 use App\Models\News;
 use App\Models\NewsImage;
 use App\Models\User;
+use Dotenv\Parser\Entry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
 class NewController extends Controller
 {
-    // public function get_blog_date(Request $request)
-    // {
-    //     try {
+    public function get_news_date(Request $request)
+    {
+        try {
 
-    //         $blog_date = DB::table('view_blog_date')
-    //             ->select('blog_month', 'blog_year', 'count')
-    //             ->get();
+            $news_date = DB::table('view_news_date')
+                ->select('news_month', 'news_year', 'count')
+                ->get();
 
-    //         $monthMap = [
-    //             1 => 'ม.ค.',
-    //             2 => 'ก.พ.',
-    //             3 => 'มี.ค.',
-    //             4 => 'เม.ย.',
-    //             5 => 'พ.ค.',
-    //             6 => 'มิ.ย.',
-    //             7 => 'ก.ค.',
-    //             8 => 'ส.ค.',
-    //             9 => 'ก.ย.',
-    //             10 => 'ต.ค.',
-    //             11 => 'พ.ย.',
-    //             12 => 'ธ.ค.'
-    //         ];
+            $monthMap = [
+                1 => 'ม.ค.',
+                2 => 'ก.พ.',
+                3 => 'มี.ค.',
+                4 => 'เม.ย.',
+                5 => 'พ.ค.',
+                6 => 'มิ.ย.',
+                7 => 'ก.ค.',
+                8 => 'ส.ค.',
+                9 => 'ก.ย.',
+                10 => 'ต.ค.',
+                11 => 'พ.ย.',
+                12 => 'ธ.ค.'
+            ];
 
-    //         foreach ($blog_date as $bd) {
-    //             $bd->blog_month_th = $monthMap[$bd->blog_month];
-    //         }
-
-
-    //         return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $blog_date);
-    //     } catch (\Exception $e) {
-    //         return $this->returnError($e->getMessage(), 405);
-    //     }
-    // }
-
-    // public function get_blog_page(Request $request)
-    // {
-    //     try {
-
-    //         $month = $request->input('month');
-    //         $year = $request->input('year');
-    //         $order_by = $request->input('order_by');
-    //         $length = $request->input('length');
-    //         $search = $request->input('search');
-    //         $start = $request->input('start');
-    //         $page = $start / $length + 1;
-
-    //         $col = array('id', 'title', 'detail', 'created_at', 'user_id', 'fname', 'lname');
-
-    //         $db = DB::table('view_blogs')
-    //             ->select($col);
-
-    //         if ($month != '' && $month != null && $year != '' && $year != null) {
-    //             $db->whereMonth('created_at', $month);
-    //             $db->whereYear('created_at', $year);
-    //         }
-
-    //         if ($search != '' && $search != null) {
-    //             $db->where(function ($query) use ($search) {
-    //                 $query->orWhere('title', 'LIKE', '%' . $search . '%');
-    //                 $query->orWhere('detail', 'LIKE', '%' . $search . '%');
-    //             });
-    //         }
-
-    //         $blogs = $db->paginate($length, ['*'], 'page', $page);
-
-    //         $monthMap = [
-    //             '01' => 'ม.ค.',
-    //             '02' => 'ก.พ.',
-    //             '03' => 'มี.ค.',
-    //             '04' => 'เม.ย.',
-    //             '05' => 'พ.ค.',
-    //             '06' => 'มิ.ย.',
-    //             '07' => 'ก.ค.',
-    //             '08' => 'ส.ค.',
-    //             '09' => 'ก.ย.',
-    //             '10' => 'ต.ค.',
-    //             '11' => 'พ.ย.',
-    //             '12' => 'ธ.ค.'
-    //         ];
-
-    //         foreach ($blogs as $blog) {
-    //             $blog_image =  BlogImage::select('path')
-    //                 ->where('blog_id', $blog->id)
-    //                 ->first();
-    //             $blog->path = $blog_image->path;
-    //             $blog->detail = explode("\n", $blog->detail)[0];
-    //             $blog->day = date('d', strtotime($blog->created_at));
-    //             $blog->month  = $monthMap[date('m', strtotime($blog->created_at))];
-    //             $blog->year = date('Y', strtotime($blog->created_at));
-
-    //             $user =  User::select('fname', 'lname')
-    //                 ->where('id', $blog->user_id)
-    //                 ->first();
-
-    //             $blog->user = $user;
-    //         }
-
-    //         return response()->json($blogs);
-    //     } catch (\Exception $e) {
-    //         return $this->returnError($e->getMessage(), 405);
-    //     }
-    // }
-
-    // public function get_blog_detail(Request $request)
-    // {
-    //     try {
-
-    //         $blog_id = $request->input('id');
-
-    //         if ($blog_id == "")
-    //             return $this->returnError('[blog_id] ไม่มีข้อมูล', 400);
-
-    //         $blog = DB::table('view_blogs')
-    //             ->select('id', 'title', 'detail', 'created_at', 'user_id', 'fname', 'lname')
-    //             ->where('id', $blog_id)
-    //             ->first();
-
-    //         $blog_images = BlogImage::select('id', 'path')
-    //             ->where('blog_id', $blog_id)
-    //             ->get();
-
-    //         $monthMap = [
-    //             '01' => 'ม.ค.',
-    //             '02' => 'ก.พ.',
-    //             '03' => 'มี.ค.',
-    //             '04' => 'เม.ย.',
-    //             '05' => 'พ.ค.',
-    //             '06' => 'มิ.ย.',
-    //             '07' => 'ก.ค.',
-    //             '08' => 'ส.ค.',
-    //             '09' => 'ก.ย.',
-    //             '10' => 'ต.ค.',
-    //             '11' => 'พ.ย.',
-    //             '12' => 'ธ.ค.'
-    //         ];
+            foreach ($news_date as $nd) {
+                $nd->news_month_th = $monthMap[$nd->news_month];
+            }
 
 
-    //         $blog->day = date('d', strtotime($blog->created_at));
-    //         $blog->month  = $monthMap[date('m', strtotime($blog->created_at))];
-    //         $blog->year = date('Y', strtotime($blog->created_at));
+            return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $news_date);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
 
-    //         $user =  User::select('fname', 'lname')
-    //             ->where('id', $blog->user_id)
-    //             ->first();
+    public function get_news_page(Request $request)
+    {
+        try {
 
-    //         $blog->user = $user;
-    //         $blog->blog_images = $blog_images;
+            $month = $request->input('month');
+            $year = $request->input('year');
+            $order_by = $request->input('order_by');
+            $length = $request->input('length');
+            $search = $request->input('search');
+            $start = $request->input('start');
+            $page = $start / $length + 1;
+
+            $col = array('id', 'title', 'detail', 'created_at', 'user_id', 'fname', 'lname');
+
+            $db = DB::table('view_news')
+                ->select($col);
+
+            if ($month != '' && $month != null && $year != '' && $year != null) {
+                $db->whereMonth('created_at', $month);
+                $db->whereYear('created_at', $year);
+            }
+
+            if ($search != '' && $search != null) {
+                $db->where(function ($query) use ($search) {
+                    $query->orWhere('title', 'LIKE', '%' . $search . '%');
+                    $query->orWhere('detail', 'LIKE', '%' . $search . '%');
+                });
+            }
+
+            $news = $db->paginate($length, ['*'], 'page', $page);
+
+            $monthMap = [
+                '01' => 'ม.ค.',
+                '02' => 'ก.พ.',
+                '03' => 'มี.ค.',
+                '04' => 'เม.ย.',
+                '05' => 'พ.ค.',
+                '06' => 'มิ.ย.',
+                '07' => 'ก.ค.',
+                '08' => 'ส.ค.',
+                '09' => 'ก.ย.',
+                '10' => 'ต.ค.',
+                '11' => 'พ.ย.',
+                '12' => 'ธ.ค.'
+            ];
+
+            foreach ($news as $n) {
+                $news_image =  NewsImage::select('path')
+                    ->where('new_id', $n->id)
+                    ->first();
+                $n->path = $news_image->path;
+                $n->detail = explode("\n", $n->detail)[0];
+                $n->day = date('d', strtotime($n->created_at));
+                $n->month  = $monthMap[date('m', strtotime($n->created_at))];
+                $n->year = date('Y', strtotime($n->created_at));
+
+                $user =  User::select('fname', 'lname')
+                    ->where('id', $n->user_id)
+                    ->first();
+
+                $news->user = $user;
+            }
+
+            return response()->json($news);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function get_news_detail(Request $request)
+    {
+        try {
+
+            $news_id = $request->input('id');
+
+            if ($news_id == "")
+                return $this->returnError('[news_id] ไม่มีข้อมูล', 400);
+
+            $news = DB::table('view_news')
+                ->select('id', 'title', 'detail', 'created_at', 'user_id', 'fname', 'lname')
+                ->where('id', $news_id)
+                ->first();
+
+            $news_images = NewsImage::select('id', 'path')
+                ->where('new_id', $news_id)
+                ->get();
+
+            $monthMap = [
+                '01' => 'ม.ค.',
+                '02' => 'ก.พ.',
+                '03' => 'มี.ค.',
+                '04' => 'เม.ย.',
+                '05' => 'พ.ค.',
+                '06' => 'มิ.ย.',
+                '07' => 'ก.ค.',
+                '08' => 'ส.ค.',
+                '09' => 'ก.ย.',
+                '10' => 'ต.ค.',
+                '11' => 'พ.ย.',
+                '12' => 'ธ.ค.'
+            ];
 
 
-    //         $blog_other = DB::table('view_blogs')
-    //             ->select('id', 'title', 'detail', 'created_at')
-    //             ->where('id','<>',$blog->id)
-    //             ->limit(6)
-    //             ->get();
+            $news->day = date('d', strtotime($news->created_at));
+            $news->month  = $monthMap[date('m', strtotime($news->created_at))];
+            $news->year = date('Y', strtotime($news->created_at));
 
-    //         foreach ($blog_other as $b) {
-    //             $blog_image =  BlogImage::select('path')
-    //                 ->where('blog_id', $b->id)
-    //                 ->first();
-    //             $b->path = $blog_image->path;
-    //             $b->detail = explode("\n", $b->detail)[0];
-    //             $b->day = date('d', strtotime($b->created_at));
-    //             $b->month  = $monthMap[date('m', strtotime($b->created_at))];
-    //             $b->year = date('Y', strtotime($b->created_at));
-    //         }
+            $user =  User::select('fname', 'lname')
+                ->where('id', $news->user_id)
+                ->first();
 
-    //         $blog->blog_other = $blog_other;
-    //         return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $blog);
-    //     } catch (\Exception $e) {
-    //         return $this->returnError($e->getMessage(), 405);
-    //     }
-    // }
+            $news->user = $user;
+            $news->news_images = $news_images;
+
+            return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $news);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
 
     public function table_news_back(Request $request)
     {
@@ -195,7 +177,7 @@ class NewController extends Controller
             $start = $request->input('start');
             $page = $start / $length + 1;
 
-            $col = array('id', 'title', 'created_at');
+            $col = array('id','path', 'title', 'created_at','show');
 
             $db = DB::table('view_news')
                 ->select($col)
@@ -222,6 +204,7 @@ class NewController extends Controller
             $login_id = $request->input('login_id');
             $title = $request->input('title');
             $detail = $request->input('detail');
+            $image = $request->input('image');
             $news_images = $request->input('news_images');
 
             if ($login_id == "")
@@ -230,6 +213,8 @@ class NewController extends Controller
                 return $this->returnError('[title] ไม่มีข้อมูล', 400);
             else if ($detail == "")
                 return $this->returnError('[detail] ไม่มีข้อมูล', 400);
+            else if ($image == "")
+                return $this->returnError('[image] ไม่มีข้อมูล', 400);
             else if ($news_images == "")
                 return $this->returnError('[news_images] ไม่มีข้อมูล', 400);
 
@@ -247,6 +232,16 @@ class NewController extends Controller
                 if (!File::exists($path))
                     File::makeDirectory($path, 0777, true);
 
+                $file = $image;
+
+                $extension = explode('/', mime_content_type($file))[1];
+                $filename = md5($new->id . rand(0, 999999)) . '.' . $extension;
+                file_put_contents($path . $filename, file_get_contents($file));
+
+                $new->path = $path . $filename;
+                $new->update();
+
+
                 foreach ($news_images as $img) {
 
                     $file = $img['image'];
@@ -256,7 +251,7 @@ class NewController extends Controller
                     file_put_contents($path . $filename, file_get_contents($file));
 
                     $new_image = new NewsImage();
-                    $new_image->blog_id = $new->id;
+                    $new_image->new_id = $new->id;
                     $new_image->path = $path . $filename;
                     $new_image->save();
                 }
@@ -271,136 +266,198 @@ class NewController extends Controller
         }
     }
 
-    // public function get_blog_detail_back(Request $request)
-    // {
-    //     try {
+    public function get_news_detail_back(Request $request)
+    {
+        try {
 
-    //         $blog_id = $request->input('id');
+            $new_id = $request->input('id');
 
-    //         if ($blog_id == "")
-    //             return $this->returnError('[blog_id] ไม่มีข้อมูล', 400);
+            if ($new_id == "")
+                return $this->returnError('[new_id] ไม่มีข้อมูล', 400);
 
-    //         $data = [];
-    //         $blog = Blog::select('id', 'title', 'detail', 'created_at', 'user_id')
-    //             ->where('id', $blog_id)
-    //             ->first();
+            $data = [];
+            $news = News::select('id', 'title', 'detail', 'path', 'created_at', 'user_id')
+                ->where('id', $new_id)
+                ->first();
 
-    //         $blog_images = BlogImage::select('id', 'path')
-    //             ->where('blog_id', $blog_id)
-    //             ->get();
+            $news_images = NewsImage::select('id', 'path')
+                ->where('new_id', $new_id)
+                ->get();
 
-    //         $blog->blog_images = $blog_images;
-    //         $data['blog'] = $blog;
+            $news->news_images = $news_images;
+            $data['news'] = $news;
 
-    //         return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $data);
-    //     } catch (\Exception $e) {
-    //         return $this->returnError($e->getMessage(), 405);
-    //     }
-    // }
+            return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $data);
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
 
-    // public function update_blog_back(Request $request)
-    // {
-    //     try {
+    public function update_news_back(Request $request)
+    {
+        try {
 
-    //         $id = $request->input('id');
-    //         $title = $request->input('title');
-    //         $detail = $request->input('detail');
-    //         $blog_images = $request->input('blog_images');
+            $id = $request->input('id');
+            $title = $request->input('title');
+            $detail = $request->input('detail');
+            $image = $request->input('image');
+            $news_images = $request->input('news_images');
 
-    //         if ($title == "")
-    //             return $this->returnError('[title] ไม่มีข้อมูล', 400);
-    //         else if ($detail == "")
-    //             return $this->returnError('[detail] ไม่มีข้อมูล', 400);
-    //         else if ($blog_images == "")
-    //             return $this->returnError('[blog_images] ไม่มีข้อมูล', 400);
+            if ($title == "")
+                return $this->returnError('[title] ไม่มีข้อมูล', 400);
+            else if ($detail == "")
+                return $this->returnError('[detail] ไม่มีข้อมูล', 400);
+            else if ($news_images == "")
+                return $this->returnError('[news_images] ไม่มีข้อมูล', 400);
 
-    //         DB::beginTransaction();
+            DB::beginTransaction();
 
-    //         $blog = Blog::where('id', $id)
-    //             ->first();
+            $news = News::where('id', $id)
+                ->first();
 
-    //         if (empty($blog))
-    //             return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
+            if (empty($news))
+                return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
 
-    //         $blog->title = $title;
-    //         $blog->detail = $detail;
+            $news->title = $title;
+            $news->detail = $detail;
 
-    //         if ($blog->update()) {
+            if ($news->update()) {
 
-    //             $path = 'images/blog/' . $blog->id . '/';
+                $path = 'images/news/' . $news->id . '/';
 
-    //             if (!File::exists($path))
-    //                 File::makeDirectory($path, 0777, true);
+                if (!File::exists($path))
+                    File::makeDirectory($path, 0777, true);
 
-    //             $blog_image_check = BlogImage::where('blog_id', $blog->id)
-    //                 ->get();
+                if (!empty($image)) {
+                    $file = $image;
+                    $extension = explode('/', mime_content_type($file))[1];
+                    $filename = md5($news->id . rand(0, 999999)) . '.' . $extension;
+                    file_put_contents($path . $filename, file_get_contents($file));
 
-    //             foreach ($blog_image_check as &$img_check) {
-    //                 $status_image_check = true;
-    //                 foreach ($blog_images as &$img) {
+                    $news->path = $path . $filename;
+                    $news->update();
+                }
 
-    //                     if ($img['id'] != '' && $img_check->id == $img['id']) {
-    //                         $status_image_check = false;
-    //                         break;
-    //                     }
-    //                 }
+                $news_image_check = NewsImage::where('new_id', $news->id)
+                    ->get();
 
-    //                 if ($status_image_check)
-    //                     $img_check->delete();
-    //             }
+                foreach ($news_image_check as &$img_check) {
+                    $status_image_check = true;
+                    foreach ($news_images as &$img) {
+
+                        if ($img['id'] != '' && $img_check->id == $img['id']) {
+                            $status_image_check = false;
+                            break;
+                        }
+                    }
+
+                    if ($status_image_check)
+                        $img_check->delete();
+                }
 
 
-    //             foreach ($blog_images as &$img) {
+                foreach ($news_images as &$img) {
 
-    //                 if ($img['id'] == "") {
+                    if ($img['id'] == "") {
 
-    //                     $file = $img['image'];
+                        $file = $img['image'];
 
-    //                     $extension = explode('/', mime_content_type($file))[1];
-    //                     $filename = md5($blog->id . rand(0, 999999)) . '.' . $extension;
-    //                     file_put_contents($path . $filename, file_get_contents($file));
+                        $extension = explode('/', mime_content_type($file))[1];
+                        $filename = md5($news->id . rand(0, 999999)) . '.' . $extension;
+                        file_put_contents($path . $filename, file_get_contents($file));
 
-    //                     $blog_image = new BlogImage();
-    //                     $blog_image->blog_id = $blog->id;
-    //                     $blog_image->path = $path . $filename;
-    //                     $blog_image->save();
-    //                 }
-    //             }
+                        $news_image = new NewsImage();
+                        $news_image->new_id = $news->id;
+                        $news_image->path = $path . $filename;
+                        $news_image->save();
+                    }
+                }
 
-    //             DB::commit();
-    //             return $this->returnSuccess('แก้ไขข้อมูลสำเร็จ', []);
-    //         } else
-    //             return $this->returnError('แก้ไขข้อมูลล้มเหลว', 400);
-    //     } catch (\Exception $e) {
-    //         DB::rollback();
-    //         return $this->returnError($e->getMessage(), 405);
-    //     }
-    // }
+                DB::commit();
+                return $this->returnSuccess('แก้ไขข้อมูลสำเร็จ', []);
+            } else
+                return $this->returnError('แก้ไขข้อมูลล้มเหลว', 400);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
 
-    // public function delete_blog_back(Request $request)
-    // {
-    //     try {
+    public function delete_news_back(Request $request)
+    {
+        try {
 
-    //         $id = $request->input('id');
+            $id = $request->input('id');
 
-    //         if ($id == "")
-    //             return $this->returnError('[id] ไม่มีข้อมูล', 400);
+            if ($id == "")
+                return $this->returnError('[id] ไม่มีข้อมูล', 400);
 
-    //         DB::beginTransaction();
+            DB::beginTransaction();
 
-    //         $blog = Blog::where('id', $id)
-    //             ->first();
+            $news = News::where('id', $id)
+                ->first();
 
-    //         if (empty($blog))
-    //             return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
+            if (empty($news))
+                return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
 
-    //         $blog->delete();
+            $news->delete();
 
-    //         DB::commit();
-    //         return $this->returnSuccess('ลบข้อมูลสำเร็จ', []);
-    //     } catch (\Exception $e) {
-    //         DB::rollback();
-    //         return $this->returnError($e->getMessage(), 405);
-    //     }
-    // }
+            DB::commit();
+            return $this->returnSuccess('ลบข้อมูลสำเร็จ', []);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function update_news_show_back(Request $request)
+    {
+        try {
+
+            $id = $request->input('id');
+
+            if ($id == "")
+                return $this->returnError('[id] ไม่มีข้อมูล', 400);
+
+            $news = News::where('id', $id)
+                ->first();
+
+            if (empty($news))
+                return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
+
+            $news->show = 1;
+            $news->update();
+
+            return $this->returnSuccess('แก้ไขข้อมูลสำเร็จ', []);
+        } catch (\Exception $e) {
+
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
+    public function update_news_noshow_back(Request $request)
+    {
+        try {
+
+            $id = $request->input('id');
+
+            if ($id == "")
+                return $this->returnError('[id] ไม่มีข้อมูล', 400);
+
+            $news = News::where('id', $id)
+                ->first();
+
+            if (empty($news))
+                return $this->returnError('ไม่พบข้อมูลที่ต้องการ', 400);
+
+            $news->show = 0;
+            $news->update();
+
+            return $this->returnSuccess('แก้ไขข้อมูลสำเร็จ', []);
+        } catch (\Exception $e) {
+
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
+
 }

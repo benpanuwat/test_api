@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Banner;
 use App\Models\BannerCategory;
 use App\Models\Partner;
+use App\Models\News;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -64,6 +65,36 @@ class ProductController extends Controller
                 ->get();
 
             $data['category'] = $category;
+
+            $news = DB::table('view_news')
+                ->select('id', 'title', 'detail', 'created_at', 'path')
+                ->where('show', 1)
+                ->orderBy('id','desc')
+                ->limit(6)
+                ->get();
+
+            $monthMap = [
+                '01' => 'ม.ค.',
+                '02' => 'ก.พ.',
+                '03' => 'มี.ค.',
+                '04' => 'เม.ย.',
+                '05' => 'พ.ค.',
+                '06' => 'มิ.ย.',
+                '07' => 'ก.ค.',
+                '08' => 'ส.ค.',
+                '09' => 'ก.ย.',
+                '10' => 'ต.ค.',
+                '11' => 'พ.ย.',
+                '12' => 'ธ.ค.'
+            ];
+
+            foreach ($news as $n) {
+                $n->day = date('d', strtotime($n->created_at));
+                $n->month  = $monthMap[date('m', strtotime($n->created_at))];
+                $n->year = date('Y', strtotime($n->created_at));
+            }
+
+            $data['news'] = $news;
 
             return $this->returnSuccess('เรียกดูข้อมูลสำเร็จ', $data);
         } catch (\Exception $e) {
@@ -215,7 +246,7 @@ class ProductController extends Controller
             $start = $request->input('start');
             $page = $start / $length + 1;
 
-            $col = array('id', 'name', 'active', 'category_name', 'path');
+            $col = array('id', 'name',  'path', 'category_name', 'active',);
 
             $db = DB::table('view_products')
                 ->select($col)

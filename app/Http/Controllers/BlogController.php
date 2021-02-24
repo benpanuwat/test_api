@@ -100,12 +100,6 @@ class BlogController extends Controller
                 $blog->day = date('d', strtotime($blog->created_at));
                 $blog->month  = $monthMap[date('m', strtotime($blog->created_at))];
                 $blog->year = date('Y', strtotime($blog->created_at));
-
-                $user =  User::select('fname', 'lname')
-                    ->where('id', $blog->user_id)
-                    ->first();
-
-                $blog->user = $user;
             }
 
             return response()->json($blogs);
