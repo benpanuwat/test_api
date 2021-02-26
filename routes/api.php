@@ -67,6 +67,11 @@ Route::group(['middleware' => 'checkjwt'], function () {
 
     //Users Backoffice
     Route::post('/table_user_back', [UserController::class, 'table_user_back']);
+    Route::post('/create_user_back', [UserController::class, 'create_user_back']);
+    Route::post('/get_user_detail_back', [UserController::class, 'get_user_detail_back']);
+    Route::post('/update_user_back', [UserController::class, 'update_user_back']);
+    Route::post('/get_user_permission_back', [UserController::class, 'get_user_permission_back']);
+    Route::post('/get_alert_back', [UserController::class, 'get_alert_back']);
 
     //Member Web
     Route::post('/get_memder_account', [MemberController::class, 'get_memder_account']);
@@ -146,4 +151,5 @@ Route::group(['middleware' => 'checkjwt'], function () {
     //Stock Backoffice
     Route::post('/table_stock_back', [StockController::class, 'table_stock_back']);
     Route::post('/get_stock_detail', [StockController::class, 'get_stock_detail']);
+    Route::post('/update_stock_back', [StockController::class, 'update_stock_back']);
 });

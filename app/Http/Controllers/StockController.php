@@ -36,11 +36,10 @@ class StockController extends Controller
 
             $product = $db->paginate($length, ['*'], 'page', $page);
 
-            foreach($product as $row)
-            {
-                $row->product_type = ProductType::select('id','name','stock')
-                ->where('product_id',$row->id)
-                ->get();
+            foreach ($product as $row) {
+                $row->product_type = ProductType::select('id', 'name', 'stock')
+                    ->where('product_id', $row->id)
+                    ->get();
             }
 
             return response()->json($product);
@@ -62,12 +61,6 @@ class StockController extends Controller
                 ->where('id', $product_id)
                 ->first();
 
-            $product_image = ProductImage::select('id', 'path', 'main')
-                ->where('product_id', $product_id)
-                ->get();
-
-            $product->product_image = $product_image;
-
             $product_type = ProductType::select('id', 'name', 'price', 'stock')
                 ->where('product_id', $product_id)
                 ->get();
@@ -80,4 +73,29 @@ class StockController extends Controller
         }
     }
 
+    public function update_stock_back(Request $request)
+    {
+        try {
+
+            $product_type = $request->input('product_type');
+
+            if ($product_type == "")
+                return $this->returnError('[product_type] ไม่มีข้อมูล', 400);
+
+            foreach ($product_type as $pt) {
+                $product_type = ProductType::where('id', $pt['id'])
+                    ->first();
+
+                if (!empty($product_type)) {
+                    $product_type->stock = intval($product_type->stock) + intval($pt['receive']);
+                    $product_type->update();
+                }
+            }
+
+            return $this->returnSuccess('บันทึกข้อมูลสำเร็จ', []);
+        } catch (\Exception $e) {
+            Db::rollBack();
+            return $this->returnError($e->getMessage(), 405);
+        }
+    }
 }
