@@ -30,7 +30,7 @@ class ProductController extends Controller
             $data['partner'] = $partner;
 
             $product_recommend = DB::table('view_products_recommend_home')
-                ->select('product_id', 'name', 'standard_price', 'category_id', 'category_name', 'path', 'price')
+                ->select('product_id', 'name','name_en', 'standard_price', 'category_id', 'category_name','category_name_en', 'path', 'price')
                 ->orderBy('product_id', 'DESC')
                 ->limit(10)
                 ->where('active', '1')
@@ -45,7 +45,7 @@ class ProductController extends Controller
             $data['product_recommend'] = $product_recommend;
 
             $product_new = DB::table('view_products_home')
-                ->select('product_id', 'name', 'standard_price', 'category_id', 'category_name', 'path', 'price')
+                ->select('product_id', 'name','name_en', 'standard_price', 'category_id', 'category_name','category_name_en', 'path', 'price')
                 ->orderBy('product_id', 'DESC')
                 ->limit(10)
                 ->where('active', 1)
@@ -60,37 +60,22 @@ class ProductController extends Controller
             $data['product_new'] = $product_new;
 
             $category = DB::table('view_category')
-                ->select('id', 'name', 'path', 'product_count')
+                ->select('id', 'name','name_en', 'path', 'product_count')
                 ->where('name', '<>', 'ไม่มีกลุ่มสินค้า')
                 ->get();
 
             $data['category'] = $category;
 
             $news = DB::table('view_news')
-                ->select('id', 'title', 'detail', 'created_at', 'path')
+                ->select('id', 'title','title_en', 'detail','detail_en', 'created_at', 'path')
                 ->where('show', 1)
                 ->orderBy('id','desc')
                 ->limit(6)
                 ->get();
 
-            $monthMap = [
-                '01' => 'ม.ค.',
-                '02' => 'ก.พ.',
-                '03' => 'มี.ค.',
-                '04' => 'เม.ย.',
-                '05' => 'พ.ค.',
-                '06' => 'มิ.ย.',
-                '07' => 'ก.ค.',
-                '08' => 'ส.ค.',
-                '09' => 'ก.ย.',
-                '10' => 'ต.ค.',
-                '11' => 'พ.ย.',
-                '12' => 'ธ.ค.'
-            ];
-
             foreach ($news as $n) {
                 $n->day = date('d', strtotime($n->created_at));
-                $n->month  = $monthMap[date('m', strtotime($n->created_at))];
+                $n->month  = date('m', strtotime($n->created_at));
                 $n->year = date('Y', strtotime($n->created_at));
             }
 
@@ -108,7 +93,7 @@ class ProductController extends Controller
 
             $data = [];
 
-            $category = Category::select('id', 'name')
+            $category = Category::select('id', 'name','name_en')
                 ->where('name', '<>', 'ไม่มีกลุ่มสินค้า')
                 ->get();
 
@@ -118,7 +103,7 @@ class ProductController extends Controller
             $data['banner_category'] = $banner_category;
 
             $product_recommend = DB::table('view_products_recommend_home')
-                ->select('product_id', 'name', 'standard_price', 'category_id', 'category_name', 'path', 'price')
+                ->select('product_id', 'name','name_en', 'standard_price', 'category_id', 'category_name','category_name_en', 'path', 'price')
                 ->orderBy('product_id', 'DESC')
                 ->limit(10)
                 ->where('active', '1')
@@ -149,7 +134,7 @@ class ProductController extends Controller
             $start = $request->input('start');
             $page = $start / $length + 1;
 
-            $col = array('product_id', 'name', 'description', 'detail', 'standard_price', 'category_id', 'category_name', 'path', 'price');
+            $col = array('product_id', 'name','name_en', 'description','description_en', 'detail','detail_en', 'standard_price', 'category_id', 'category_name','category_name_en', 'path', 'price');
 
             $db = DB::table('view_products_page')
                 ->select($col)
@@ -169,8 +154,11 @@ class ProductController extends Controller
             if ($search != '' && $search != null) {
                 $db->where(function ($query) use ($search) {
                     $query->orWhere('name', 'LIKE', '%' . $search . '%');
+                    $query->orWhere('name_en', 'LIKE', '%' . $search . '%');
                     $query->orWhere('description', 'LIKE', '%' . $search . '%');
+                    $query->orWhere('description_en', 'LIKE', '%' . $search . '%');
                     $query->orWhere('detail', 'LIKE', '%' . $search . '%');
+                    $query->orWhere('detail_en', 'LIKE', '%' . $search . '%');
                 });
             }
 
@@ -197,7 +185,7 @@ class ProductController extends Controller
             if ($product_id == "")
                 return $this->returnError('[product_id] ไม่มีข้อมูล', 400);
 
-            $product = Product::select('id', 'name', 'description', 'detail', 'standard_price', 'category_id')
+            $product = Product::select('id', 'name','name_en', 'description','description_en', 'detail','detail_en', 'standard_price', 'category_id')
                 ->where('id', $product_id)
                 ->first();
 
@@ -207,14 +195,14 @@ class ProductController extends Controller
 
             $product->product_image = $product_image;
 
-            $product_type = ProductType::select('id', 'name', 'price', 'stock')
+            $product_type = ProductType::select('id', 'name','name_en', 'price', 'stock')
                 ->where('product_id', $product_id)
                 ->get();
 
             $product->product_type = $product_type;
 
             $category_product = DB::table('view_producy_category')
-                ->select('product_id', 'name', 'standard_price', 'category_id', 'category_name', 'path', 'price')
+                ->select('product_id', 'name','name_en', 'standard_price', 'category_id', 'category_name','category_name_en', 'path', 'price')
                 ->where('category_id', $product->category_id)
                 ->where('product_id', '<>', $product->id)
                 ->limit(6)

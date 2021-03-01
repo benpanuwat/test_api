@@ -31,6 +31,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\NewController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\DashboardController;
 
 //Login
 Route::post('/member_login', [LoginController::class, 'member_login']);
@@ -152,4 +153,6 @@ Route::group(['middleware' => 'checkjwt'], function () {
     Route::post('/table_stock_back', [StockController::class, 'table_stock_back']);
     Route::post('/get_stock_detail', [StockController::class, 'get_stock_detail']);
     Route::post('/update_stock_back', [StockController::class, 'update_stock_back']);
+    //Stock Backoffice
+    Route::post('/get_dashboard_back', [DashboardController::class, 'get_dashboard_back']);
 });

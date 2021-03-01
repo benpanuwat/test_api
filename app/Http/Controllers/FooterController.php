@@ -12,7 +12,7 @@ class FooterController extends Controller
         try {
 
             $data = array();
-            $category = Category::select('id', 'name')
+            $category = Category::select('id', 'name','name_en')
                 ->where('name', '<>', 'ไม่มีกลุ่มสินค้า')
                 ->get();
 

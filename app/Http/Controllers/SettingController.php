@@ -130,7 +130,7 @@ class SettingController extends Controller
 
                     $banner_category = new  BannerCategory();
                     if ($banner_category->save()) {
-                        $path = 'images/banner_category/' . $banner_category->id . '/';
+                        $path = 'images/banner_category/';
 
                         if (!File::exists($path))
                             File::makeDirectory($path, 0777, true);

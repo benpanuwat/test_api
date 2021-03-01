@@ -16,7 +16,7 @@ class HeaderController extends Controller
             $data = array();
             $cart = array();
 
-            $category = Category::select('id', 'name')
+            $category = Category::select('id', 'name','name_en')
                 ->where('name', '<>', 'ไม่มีกลุ่มสินค้า')
                 ->get();
 
@@ -47,14 +47,14 @@ class HeaderController extends Controller
             $data = array();
             $cart = array();
 
-            $category = Category::select('id', 'name')
+            $category = Category::select('id', 'name','name_en')
                 ->where('name', '<>', 'ไม่มีกลุ่มสินค้า')
                 ->get();
 
             $data['category'] = $category;
 
             $products = DB::table('view_cart')
-                ->select('id', 'product_id', 'name', 'count', 'price', 'path')
+                ->select('id', 'product_id', 'name','name_en', 'count', 'price', 'path')
                 ->where('member_id', $login_id)
                 ->get();
 
